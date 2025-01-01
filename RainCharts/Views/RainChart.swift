@@ -35,9 +35,10 @@ struct RainChart: View {
                 .chartYScale(domain: 0...1)
                 .chartYAxis {
                     AxisMarks(position: .leading) {
-                        AxisValueLabel(format: Decimal.FormatStyle.Percent.percent)
                         AxisGridLine()
-                        AxisTick(length: 12) // Spans the largest PointMark
+                        AxisTick(length: 12, stroke: StrokeStyle(lineWidth: 0.5))
+                            .foregroundStyle(.background) // Fake padding to match the symbol size
+                        AxisValueLabel(format: Decimal.FormatStyle.Percent.percent)
                     }
                 }
                 .padding()
