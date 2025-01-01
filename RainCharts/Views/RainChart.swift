@@ -28,17 +28,19 @@ struct RainChart: View {
                 .chartXAxis {
                     AxisMarks(values: generateRoundedTickValues(data: data)) {
                         AxisValueLabel(format: .dateTime.hour().minute())
-                        AxisGridLine()
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                        AxisTick(stroke: StrokeStyle(lineWidth: 0.5))
                     }
                 }
                 .chartYScale(domain: 0...1)
                 .chartYAxis {
                     AxisMarks(position: .leading) {
-                        AxisValueLabel(format: Decimal.FormatStyle.Percent())
+                        AxisValueLabel(format: Decimal.FormatStyle.Percent.percent)
                         AxisGridLine()
+                        AxisTick(length: 12) // Spans the largest PointMark
                     }
                 }
-                .padding(.trailing)
+                .padding()
                 .frame(height: 200)
             } else {
                 ProgressView("Loading...")
@@ -56,8 +58,8 @@ struct RainChart: View {
         }
         
         let range = maxDate.timeIntervalSince(minDate)
-        let interval: TimeInterval = if range < (70 * 60) { // Wiggle room on 1 hour data
-            15 * 60  // 15 mins
+        let interval: TimeInterval = if range < (120 * 60) { // Minutely data is between and hour and 2 hours?
+            30 * 60  // 15 mins
         } else {
             8 * 60 * 60 // 8 hours
         }
