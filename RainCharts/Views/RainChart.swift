@@ -11,33 +11,41 @@ import Foundation
 
 struct RainChart: View {
     
-    let data: [RainDataPoint]
+    let data: [RainDataPoint]?
     let rainColor = Color(red: 0.486, green: 0.710, blue: 0.925, opacity: 0.5)
 
     var body: some View {
-        Chart(data) { rainDataPoint in
-            PointMark(
-                x: .value("Datetime", rainDataPoint.datetime),
-                y: .value("Probability", rainDataPoint.probability)
-            )
-            .symbolSize(rainDataPoint.intensity * 500)
-            .foregroundStyle(rainColor)
-        }
-        .chartXAxis {
-            AxisMarks(values: generateRoundedTickValues(data: data)) {
-                AxisValueLabel(format: .dateTime.hour().minute())
-                AxisGridLine()
+        Group {
+            if let data = data {
+                Chart(data) { rainDataPoint in
+                    PointMark(
+                        x: .value("Datetime", rainDataPoint.datetime),
+                        y: .value("Probability", rainDataPoint.probability)
+                    )
+                    .symbolSize(rainDataPoint.intensity * 500)
+                    .foregroundStyle(rainColor)
+                }
+                .chartXAxis {
+                    AxisMarks(values: generateRoundedTickValues(data: data)) {
+                        AxisValueLabel(format: .dateTime.hour().minute())
+                        AxisGridLine()
+                    }
+                }
+                .chartYScale(domain: 0...1)
+                .chartYAxis {
+                    AxisMarks(position: .leading) {
+                        AxisValueLabel(format: Decimal.FormatStyle.Percent())
+                        AxisGridLine()
+                    }
+                }
+                .padding(.trailing)
+                .frame(height: 200)
+            } else {
+                ProgressView("Loading...")
+                    .padding(.trailing)
+                    .frame(height: 200)
             }
         }
-        .chartYScale(domain: 0...1)
-        .chartYAxis {
-            AxisMarks(position: .leading) {
-                AxisValueLabel(format: Decimal.FormatStyle.Percent())
-                AxisGridLine()
-            }
-        }
-        .padding(.trailing)
-        .frame(height: 200)
     }
     
     // Generate rounded tick values based on the dataset
@@ -83,10 +91,18 @@ extension Date {
     }
 }
 
-#Preview {
+#Preview("Sample data") {
     Group {
         RainChart(data: sampleHourData)
         RainChart(data: sampleDayData)
-        RainChart(data: sampleBoundsData)
+        Spacer()
     }
+}
+
+#Preview("Bounds") {
+    RainChart(data: sampleBoundsData)
+}
+
+#Preview("nil") {
+    RainChart(data: nil)
 }
