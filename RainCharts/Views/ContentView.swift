@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 var forecastService: ForecastService = ForecastService()
 
 struct ContentView: View {
-    @State var errorMessage: String?
     @StateObject var viewModel = ContentViewModel()
     
     var body: some View {
@@ -32,12 +32,21 @@ struct ContentView: View {
                     .padding(.bottom)
                     .frame(maxWidth: .infinity, alignment: .center)
 
-                if let errorMessage = errorMessage {
+                if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.secondary)
-                        .padding()
                         .multilineTextAlignment(.leading)
                 }
+                Group {
+                    if let location = viewModel.location {
+                        Text("Latitude: \(location.coordinate.latitude)")
+                        Text("Longitude: \(location.coordinate.longitude)")
+                    } else {
+                        Text("Fetching location...")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
         .padding()
@@ -55,7 +64,8 @@ struct ContentView: View {
         viewModel: ContentViewModel(
             forecast: Forecast(
                 nextDayRainData: sampleDayData,
-                nextHourRainData: sampleHourData)
+                nextHourRainData: sampleHourData),
+            location: CLLocation(latitude: 40.7127, longitude: -73.9653)
         )
     )
 }

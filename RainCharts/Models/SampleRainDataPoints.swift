@@ -10,6 +10,7 @@ import Foundation
 var sampleHourData: [RainDataPoint] = generateHourSample()
 var sampleDayData: [RainDataPoint] = generateDaySample()
 var sampleBoundsData: [RainDataPoint] = generateBoundsSample()
+var sampleEmptyData: [RainDataPoint] = []
 
 func generateHourSample() -> [RainDataPoint] {
     let now = Date()

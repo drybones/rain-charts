@@ -12,10 +12,18 @@
                value = "dict[&quot;precipitationIntensity&quot;] as? Double">
             </PersistentString>
             <PersistentString
-               value = "dict[&quot;precipitationIntensity&quot;]">
+               value = "dict[&quot;forecastStart&quot;]">
             </PersistentString>
             <PersistentString
-               value = "dict[&quot;forecastStart&quot;]">
+               value = "dict[&quot;precipitationIntensity&quot;]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ContentViewModel.refreshForecast(location:):ContentViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "location.coordinate">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

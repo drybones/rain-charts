@@ -15,8 +15,12 @@ struct RainChart: View {
     let rainColor = Color(red: 0.486, green: 0.710, blue: 0.925, opacity: 0.5)
 
     var body: some View {
-        Group {
-            if let data = data {
+        if let data = data {
+            if data.isEmpty {
+                Text("No rain data")
+                    .foregroundColor(.secondary)
+                    .frame(height: 200)
+            } else {
                 Chart(data) { rainDataPoint in
                     PointMark(
                         x: .value("Datetime", rainDataPoint.datetime),
@@ -43,11 +47,11 @@ struct RainChart: View {
                 }
                 .padding()
                 .frame(height: 200)
-            } else {
-                ProgressView("Loading...")
-                    .padding(.trailing)
-                    .frame(height: 200)
             }
+        } else {
+            ProgressView("Loading...")
+                .padding(.trailing)
+                .frame(height: 200)
         }
     }
     
@@ -108,4 +112,8 @@ extension Date {
 
 #Preview("nil") {
     RainChart(data: nil)
+}
+
+#Preview("empty") {
+    RainChart(data: sampleEmptyData)
 }

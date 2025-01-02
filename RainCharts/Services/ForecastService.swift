@@ -8,10 +8,18 @@
 import Foundation
 
 class ForecastService {
-    let url = "https://forecast.drybones.co.uk/api/forecast?latitude=52.1389862&longitude=0.3985286"
+    let baseurl = "https://forecast.drybones.co.uk/api/forecast"
     
-    func fetchForecast() async throws -> Forecast {
-        guard let url = URL(string: url) else {
+    func fetchForecast(latitude: Double, longitude: Double) async throws -> Forecast {
+        guard let baseurl = URL(string: baseurl) else {
+            throw URLError(.badURL)
+        }
+        var urlcomponents = URLComponents(url: baseurl, resolvingAgainstBaseURL: true)
+        urlcomponents?.queryItems = [
+            URLQueryItem(name: "latitude", value: String(format: "%.4f", latitude)), // %.4f is ~10m accuracy
+            URLQueryItem(name: "longitude", value: String(format: "%.4f", longitude))
+        ]
+        guard let url: URL = urlcomponents?.url else {
             throw URLError(.badURL)
         }
         
