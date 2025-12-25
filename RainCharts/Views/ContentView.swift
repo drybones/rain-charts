@@ -8,8 +8,6 @@
 import SwiftUI
 import CoreLocation
 
-var forecastService: ForecastService = ForecastService()
-
 struct ContentView: View {
     @StateObject var viewModel = ContentViewModel()
     @State var showLog = false
@@ -49,24 +47,11 @@ struct ContentView: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-//                Button("Show Log") {
-//                    logMessage = viewModel.forecastLog.map { "\($0.datetime.formatted(date: .omitted, time: .standard))   \($0.location.coordinate.latitude), \($0.location.coordinate.longitude)" }.joined(separator: "\n")
-//                    showLog = true
-//                }
-//                .alert("Forecast request log", isPresented: $showLog) {
-//                    Button("OK", role: .cancel) {}
-//                } message: {
-//                    Text(logMessage)
-//                }
-//                .padding(.top)
             }
         }
         .padding()
         .refreshable {
-            await viewModel.refreshForecast()
-        }
-        .task {
-            await viewModel.refreshForecast()
+            await viewModel.refreshForecast(immediate: true)
         }
     }
 }
