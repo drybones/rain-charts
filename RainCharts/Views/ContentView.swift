@@ -53,7 +53,7 @@ struct ContentView: View {
         .refreshable {
             await viewModel.refreshForecast(immediate: true)
         }
-    }
+    }   
 }
 
 #Preview {

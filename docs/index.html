@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainCharts - Support</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: #4a5568;
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        main {
+            padding: 30px;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        section:last-child {
+            margin-bottom: 0;
+        }
+        h2 {
+            font-size: 1.25rem;
+            color: #4a5568;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        p {
+            margin-bottom: 12px;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .support-email {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        .support-email:hover {
+            background: #5a67d8;
+            text-decoration: none;
+        }
+        .faq-item {
+            margin-bottom: 16px;
+        }
+        .faq-item strong {
+            display: block;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+        .faq-item p {
+            margin-bottom: 0;
+            color: #718096;
+        }
+        footer {
+            background: #f7fafc;
+            padding: 20px 30px;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RainCharts</h1>
+            <p>Simple rain probability forecasts at a glance</p>
+        </header>
+
+        <main>
+            <section>
+                <h2>About</h2>
+                <p>RainCharts shows you the probability of rain for the next hour and the next day using easy-to-read visual charts. The app uses your location to provide accurate local forecasts, so you always know when to grab an umbrella.</p>
+            </section>
+
+            <section>
+                <h2>Support</h2>
+                <p>Having trouble with RainCharts? We're here to help.</p>
+                <a href="mailto:support@drybones.co.uk" class="support-email">support@drybones.co.uk</a>
+            </section>
+
+            <section>
+                <h2>Frequently Asked Questions</h2>
+
+                <div class="faq-item">
+                    <strong>Why does the app need my location?</strong>
+                    <p>RainCharts uses your location to fetch accurate rain forecasts for your area. Without location access, we can't show you local weather data.</p>
+                </div>
+
+                <div class="faq-item">
+                    <strong>The app shows "No location available"</strong>
+                    <p>Go to Settings > Privacy & Security > Location Services and ensure RainCharts has permission to access your location.</p>
+                </div>
+
+                <div class="faq-item">
+                    <strong>How often does the forecast update?</strong>
+                    <p>The forecast updates automatically when you open the app or when your location changes. You can also pull down to refresh manually.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Privacy</h2>
+                <p>RainCharts uses your location solely to provide local rain forecasts. Your location data is sent to our forecast service to retrieve weather data but is not stored or shared with third parties.</p>
+                <p>We do not collect any personal information, and there are no analytics or tracking in the app.</p>
+            </section>
+        </main>
+
+        <footer>
+            &copy; 2025 RainCharts. All rights reserved.
+        </footer>
+    </div>
+</body>
+</html>
