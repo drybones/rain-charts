@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import CoreLocation
+import WidgetKit
 
 @MainActor
 class ContentViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
@@ -59,6 +60,13 @@ class ContentViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
             }
 
             self.location = approxLocation
+
+            // Cache location for widget
+            AppGroupStore.saveCachedLocation(CachedLocation(
+                latitude: approxLocation.coordinate.latitude,
+                longitude: approxLocation.coordinate.longitude,
+                timestamp: Date()
+            ))
 
             // Debounce: cancel any pending debounce and start a new one
             debounceTask?.cancel()
@@ -129,6 +137,16 @@ class ContentViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
 
             self.forecast = newForecast
             self.errorMessage = nil
+
+            // Cache forecast for widget and trigger refresh
+            AppGroupStore.saveCachedForecast(CachedForecast(
+                nextHourRainData: newForecast.nextHourRainData,
+                nextDayRainData: newForecast.nextDayRainData,
+                fetchedAt: Date(),
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            ))
+            WidgetCenter.shared.reloadAllTimelines()
             self.forecastLog.append(ForecastLog(datetime: Date(), location: location))
             while self.forecastLog.count > 5 {
                 self.forecastLog.removeFirst()

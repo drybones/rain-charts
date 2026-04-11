@@ -68,7 +68,7 @@ class ForecastService {
     }
 }
 
-struct Forecast: Decodable {
+struct Forecast: Codable {
     var nextDayRainData: [RainDataPoint]
     var nextHourRainData: [RainDataPoint]
 }
