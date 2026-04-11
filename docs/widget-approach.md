@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add an iOS widget extension to RainCharts that displays the "next hour" precipitation chart. The widget's core value is the bubble chart visualization that shows **both** rain probability (Y-axis position) and intensity (bubble size) simultaneously - this richness should be preserved even at widget scale.
+Add an iOS widget extension to RainCharts with three widget variants showing precipitation charts. The widget's core value is the bubble chart visualization that shows **both** rain probability (Y-axis position) and intensity (bubble size) simultaneously - this richness should be preserved even at widget scale.
 
 ## Apple WidgetKit Constraints
 
@@ -26,7 +26,12 @@ Add an iOS widget extension to RainCharts that displays the "next hour" precipit
 | `systemMedium` | 360x169 pt | Compact chart - primary widget |
 | `systemLarge` | 360x376 pt | Full chart with more detail |
 
-**Recommendation:** Support `systemMedium` and `systemLarge` only. Both sizes display the bubble chart - the core value is showing probability and intensity together, which requires the chart visualization.
+**Three widgets, two sizes:**
+- **Rain Next Hour** (`systemMedium`) - compact next-hour bubble chart
+- **Rain Today & Tomorrow** (`systemMedium`) - compact day-level bubble chart
+- **Rain Overview** (`systemLarge`) - both charts stacked
+
+All widgets use `.contentMarginsDisabled()` with manual padding for tighter layout control.
 
 ---
 
@@ -85,6 +90,7 @@ struct CachedLocation: Codable {
 
 struct CachedForecast: Codable {
     let nextHourRainData: [RainDataPoint]
+    let nextDayRainData: [RainDataPoint]
     let fetchedAt: Date
     let latitude: Double
     let longitude: Double
@@ -93,7 +99,8 @@ struct CachedForecast: Codable {
 
 **Widget-specific:**
 - `TimelineProvider` implementation (fetches forecast, builds sliding timeline)
-- `WidgetEntryView` with size-adaptive layouts
+- `WidgetEntryView` with per-widget views (`NextHourWidgetView`, `TodayWidgetView`, `CombinedWidgetView`)
+- `WidgetChartView` adapted bubble chart with compact/full modes
 - `AppGroupStore` helper for reading/writing shared UserDefaults
 
 ---
@@ -127,6 +134,7 @@ if let data = try? JSONEncoder().encode(cachedLocation) {
 let sharedDefaults = UserDefaults(suiteName: "group.uk.co.drybones.raincharts")
 let cachedForecast = CachedForecast(
     nextHourRainData: newForecast.nextHourRainData,
+    nextDayRainData: newForecast.nextDayRainData,
     fetchedAt: Date(),
     latitude: location.coordinate.latitude,
     longitude: location.coordinate.longitude
@@ -144,11 +152,13 @@ WidgetCenter.shared.reloadAllTimelines()
 #### File Structure
 ```
 RainChartsWidget/
-├── RainChartsWidget.swift          # Widget configuration
-├── RainChartWidgetBundle.swift     # Widget bundle entry point
-├── TimelineProvider.swift          # Timeline generation
-├── WidgetEntryView.swift           # Size-adaptive views
-└── Info.plist
+├── RainChartsWidget.swift          # Three Widget configs + TimelineProvider
+├── RainChartsWidgetBundle.swift    # Widget bundle entry point
+├── WidgetEntryView.swift           # Per-widget views + shared placeholder components
+├── WidgetChartView.swift           # Adapted bubble chart for widget sizes
+├── RainChartsWidget.entitlements   # App Groups
+├── Info.plist
+└── Assets.xcassets
 ```
 
 #### TimelineProvider Implementation
@@ -192,44 +202,25 @@ This means ~1 refresh per hour, well within the 40-70/day budget.
 
 ### Phase 4: Widget Views
 
-Both widget sizes display the bubble chart - the visualization that shows probability (Y-axis) and intensity (bubble size) is the core value proposition.
+Three separate widgets registered in `RainChartsWidgetBundle`, each with its own view:
 
-#### Medium Widget (systemMedium)
-Compact chart optimized for limited height:
-- Bubble chart with probability on Y-axis, intensity as bubble size
-- Minimal axis labels (start/end time only, or 30-min intervals)
-- Reduced or hidden Y-axis labels to save horizontal space
-- Tight padding for widget constraints
-- Small "updated X min ago" text
+#### Rain Next Hour (systemMedium)
+- `NextHourWidgetView` - "Next hour" headline + compact bubble chart
+- 30-minute X-axis tick intervals, hidden Y-axis labels (grid lines only)
+- Smaller bubble size multiplier (300 vs 500) for compact fit
 
-#### Large Widget (systemLarge)
-Fuller chart with more breathing room:
-- Same bubble chart visualization
-- More axis labels (15-min intervals)
+#### Rain Today & Tomorrow (systemMedium)
+- `TodayWidgetView` - "Today & tomorrow" headline + compact bubble chart
+- 8-hour X-axis tick intervals (auto-detected from data range)
+- Same compact styling as Next Hour
+
+#### Rain Overview (systemLarge)
+- `CombinedWidgetView` - both charts stacked vertically
+- 15-minute X-axis ticks for hour data, 8-hour for day data
 - Y-axis percentage labels visible
-- Room for "Next Hour" title
-- "Updated X min ago" timestamp
-- More comfortable padding
+- Fuller padding and headline font
 
-```swift
-struct WidgetEntryView: View {
-    var entry: Provider.Entry
-    @Environment(\.widgetFamily) var family
-
-    var body: some View {
-        switch family {
-        case .systemMedium:
-            WidgetChartView(entry: entry, compact: true)
-        case .systemLarge:
-            WidgetChartView(entry: entry, compact: false)
-        default:
-            Text("Unsupported")
-        }
-    }
-}
-```
-
-The `WidgetChartView` wraps an adapted `RainChart` with size-appropriate configuration rather than having completely separate views.
+All widgets use `.contentMarginsDisabled()` with manual padding (tighter at bottom than top) for maximum chart area. Shared placeholder views (`PlaceholderViews` enum) handle no-location, no-data, and loading states consistently.
 
 ---
 
@@ -242,7 +233,7 @@ The `WidgetChartView` wraps an adapted `RainChart` with size-appropriate configu
 | Network in widget | One lightweight API call per timeline refresh (~1/hour) |
 | Refresh frequency | `.atEnd` policy; sliding timeline covers ~1 hour per fetch |
 | Location requests | Reuse app's cached location; no CLLocationManager in widget |
-| Data size | Fetch only `nextHourRainData` (~60-90 points) |
+| Data size | Fetches both `nextHourRainData` (~60-90 points) and `nextDayRainData` (~24 points) |
 
 ### Data Freshness Strategy
 
@@ -296,11 +287,12 @@ The widget always uses whatever cached location it has, no matter how old. It ne
 - `Shared/AppGroupStore.swift` - Read/write helper for App Group UserDefaults
 
 ### New Files (Widget Extension)
-- `RainChartsWidget/RainChartsWidget.swift` - TimelineProvider, Entry, widget config
-- `RainChartsWidget/RainChartWidgetBundle.swift` - @main entry point
-- `RainChartsWidget/WidgetEntryView.swift` - Size-adaptive views
-- `RainChartsWidget/WidgetChartView.swift` - Adapted RainChart for widget sizes
+- `RainChartsWidget/RainChartsWidget.swift` - Three Widget configs (NextHourWidget, TodayWidget, RainChartsWidget) + shared TimelineProvider
+- `RainChartsWidget/RainChartsWidgetBundle.swift` - @main entry point registering all three widgets
+- `RainChartsWidget/WidgetEntryView.swift` - Per-widget views + shared PlaceholderViews and LocationAgeView
+- `RainChartsWidget/WidgetChartView.swift` - Adapted bubble chart with compact/full modes and auto-detected tick intervals
 - `RainChartsWidget/RainChartsWidget.entitlements` - App Groups
+- `RainChartsWidgetExtension.entitlements` - App Groups (project root)
 - `RainChartsWidget/Info.plist`
 - `RainChartsWidget/Assets.xcassets`
 
@@ -317,13 +309,17 @@ The widget always uses whatever cached location it has, no matter how old. It ne
 
 ---
 
-## Open Questions / Decisions
+## Decisions Made
 
-1. **Widget name**: "Rain Next Hour" or "RainCharts"?
-2. **Accent color**: Match app's rain blue or use system tint?
-3. **Tap action**: Deep link to specific view or just open app?
-4. **Medium widget Y-axis**: Show percentage labels (takes space) or hide them (cleaner but less precise)?
-5. **Background App Refresh**: Skipped for v1 (unreliable scheduling, marginal benefit since location rarely changes while phone is idle). Revisit if user feedback indicates stale location is a problem.
+1. **Widget names**: "Rain Next Hour", "Rain Today & Tomorrow", "Rain Overview"
+2. **Medium widget Y-axis**: Hidden labels, grid lines only (cleaner at compact size)
+3. **Content margins**: Disabled via `.contentMarginsDisabled()`, manual padding applied
+4. **Background App Refresh**: Skipped for v1 (unreliable scheduling, marginal benefit since location rarely changes while phone is idle). Revisit if user feedback indicates stale location is a problem.
+
+## Open Questions
+
+1. **Accent color**: Match app's rain blue or use system tint?
+2. **Tap action**: Deep link to specific view or just open app?
 
 ---
 
